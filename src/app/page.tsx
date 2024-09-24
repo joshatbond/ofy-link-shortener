@@ -1,7 +1,25 @@
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <p>URL shortening in progress...</p>
+    <main className="bg-neutral-800">
+      <div className="flex h-full flex-col items-center justify-center gap-4 bg-neutral-950 bg-gradient-to-r from-neutral-950 to-gray-700/20 px-4 py-24 md:flex-row md:gap-12 xl:gap-20">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo.png"
+          alt="Logo"
+          className="hidden h-full w-full max-w-40 object-contain object-center md:block xl:max-w-60"
+        />
+        <div className="max-w-sm space-y-4">
+          <h1 className="text-3xl">Link Shortening without the hassle.</h1>
+          <p className="text-neutral-400">
+            Your time is important, skip the wait and privacy concerns with
+            ad-funded shorteners.
+          </p>
+
+          <button className="w-full rounded bg-slate-700 px-3 py-2 text-lg font-semibold hover:bg-slate-600 focus-visible:bg-slate-600 active:bg-slate-600">
+            Sign in to get started
+          </button>
+        </div>
+      </div>
     </main>
-  );
+  )
 }

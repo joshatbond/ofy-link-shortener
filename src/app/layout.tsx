@@ -32,8 +32,8 @@ export default function RootLayout({
 
 function Header() {
   return (
-    <header className="">
-      <nav className="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-700 p-4 font-semibold">
+    <header className="bg-gradient-to-r from-neutral-950 to-gray-700/20">
+      <nav className="flex flex-wrap items-center justify-between gap-4 p-4 font-semibold">
         <Link href="/">
           <span className="text-2xl">ShortCuts</span>
         </Link>
