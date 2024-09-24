@@ -15,9 +15,16 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body className="min-h-screen bg-neutral-950 text-neutral-50">
-        <Header />
-        {children}
+      <body className="bg-neutral-950 text-neutral-50">
+        <div className="grid min-h-screen grid-rows-[auto_1fr]">
+          <Header />
+          {children}
+        </div>
+        <footer className="border-t border-t-neutral-700 p-4">
+          <p className="text-end">
+            &copy; {`${new Date().getFullYear()} J. Richardson`}
+          </p>
+        </footer>
       </body>
     </html>
   )
