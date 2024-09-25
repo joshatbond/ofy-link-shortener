@@ -13,13 +13,13 @@ export const createTable = pgTableCreator(name => `ofy-link-shortener_${name}`)
 export const users = createTable('users', {
   id: serial('id').primaryKey(),
   clerkId: varchar('clerk_id').notNull(),
-  created: integer('created_at').default(Date.now()),
+  created: integer('created_at').default(Math.floor(Date.now() / 1000)),
   isActive: boolean('is_active').default(true),
 })
 
 export const links = createTable('links', {
   id: serial('id').primaryKey(),
-  created: integer('created_at').default(Date.now()),
+  created: integer('created_at').default(Math.floor(Date.now() / 1000)),
   slug: varchar('slug', { length: 128 }).notNull(),
   expires: integer('expires_at'),
   redirectUrl: varchar('redirect_url').notNull(),
@@ -39,7 +39,7 @@ export const linkRelations = relations(links, ({ one, many }) => ({
 
 export const tags = createTable('tags', {
   id: serial('id').primaryKey(),
-  created: integer('created_at').default(Date.now()),
+  created: integer('created_at').default(Math.floor(Date.now() / 1000)),
   name: varchar('name', { length: 256 }).notNull(),
   createdBy: integer('created_by')
     .notNull()
