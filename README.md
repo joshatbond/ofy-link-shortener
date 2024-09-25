@@ -7,7 +7,7 @@
 - [x] Set up a batabase (w/ vercel postgres)
 - [x] Add authentication (w/ clerk)
 - [ ] Attach database to UI
-  - [ ] Scaffold `/dashboard` page table
+  - [x] Scaffold `/dashboard` page table
   - [ ] Scaffold `/dashboard/[id]` CRUD form
   - [ ] Scaffold redirect route for `/[id]`
 - [ ] Error management (w/ setry)

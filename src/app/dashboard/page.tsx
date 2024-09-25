@@ -1,19 +1,27 @@
 import Link from 'next/link'
 
-import { mockData } from '@/server/mockData'
+import { hashids } from '@/lib/hash'
+import { db } from '@/server/db'
 
 export const dynamic = 'force-dynamic'
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const dbLinks = await db.query.links.findMany({
+    with: { linkTags: { with: { tag: true } } },
+  })
+  const links = dbLinks.map(link => ({
+    ...link,
+    id: hashids.encode(link.id),
+  }))
+
   return (
     <div>
       <h1>Dashboard</h1>
-      {mockData.map(link => (
+      {links.map(link => (
         <div key={link.id}>
-          <img src={link.image} alt={link.description} />
           <div>
-            <p>{link.title}</p>
-            <Link href={link.url} target="_blank">
+            <p>{link.slug}</p>
+            <Link href={link.redirectUrl} target="_blank">
               Go to URL
             </Link>
             <Link href={`/dashboard/${link.id}`}>Edit Link</Link>
