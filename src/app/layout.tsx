@@ -6,11 +6,13 @@ import {
   UserButton,
 } from '@clerk/nextjs'
 import { auth } from '@clerk/nextjs/server'
+import { eq } from 'drizzle-orm'
 import { GeistSans } from 'geist/font/sans'
 import { type Metadata } from 'next'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 
+import { db } from '@/server/db'
+import { users } from '@/server/db/schema'
 import '@/styles/globals.css'
 
 import { Redirector } from './_components/HeaderRedirect'
@@ -44,6 +46,23 @@ export default function RootLayout({
 }
 
 async function Header() {
+  const session = auth()
+  if (session && 'userId' in session && session.userId) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.clerkId, session.userId),
+    })
+    if (!user) {
+      try {
+        await db.insert(users).values({
+          clerkId: session.userId,
+          created: Math.floor(Date.now() / 1000),
+        })
+      } catch (error) {
+        console.error('Error creating user', error)
+      }
+    }
+  }
+
   return (
     <header className="bg-gradient-to-r from-neutral-950 to-gray-700/20">
       <Redirector />
