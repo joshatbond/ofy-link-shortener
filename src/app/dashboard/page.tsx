@@ -1,18 +1,13 @@
 import Link from 'next/link'
 
-import { hashids } from '@/lib/hash'
-import { db } from '@/server/db'
+import { findLinks } from '@/server/db/actions'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  const dbLinks = await db.query.links.findMany({
+  const links = await findLinks({
     with: { linkTags: { with: { tag: true } } },
   })
-  const links = dbLinks.map(link => ({
-    ...link,
-    id: hashids.encode(link.id),
-  }))
 
   return (
     <div>
