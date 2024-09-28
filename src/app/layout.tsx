@@ -26,7 +26,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${GeistSans.variable}`}>
+      <html lang="en" className={`${GeistSans.variable} dark`}>
         <body className="bg-neutral-950 text-neutral-50">
           <div className="grid min-h-screen grid-rows-[auto_1fr]">
             <Header />
