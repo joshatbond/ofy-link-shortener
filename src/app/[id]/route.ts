@@ -10,5 +10,5 @@ export async function GET(request: NextRequest) {
   unknownRoute.pathname = '/unknown'
 
   const link = await findLink(slug!)
-  return NextResponse.rewrite(link?.redirectUrl ?? unknownRoute)
+  return NextResponse.redirect(link?.redirectUrl ?? unknownRoute)
 }
