@@ -1,7 +1,6 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Tooltip } from '@radix-ui/react-tooltip'
 import { redirect } from 'next/dist/server/api-utils'
 import Link from 'next/link'
 import { type ReactNode, useMemo, useState } from 'react'
@@ -33,6 +32,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { Tooltip } from '@/components/ui/tooltip'
 import {
   TooltipContent,
   TooltipProvider,
