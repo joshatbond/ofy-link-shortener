@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm'
 
 import { hashids } from '@/lib/hash'
 import { db } from '@/server/db'
-import { users } from '@/server/db/schema'
+import { links, users } from '@/server/db/schema'
 
 export async function createUserFromAuth(userId: string) {
   const user = await db.query.users.findFirst({
@@ -25,9 +25,10 @@ export async function findLinks(
   return links.map(encodeId)
 }
 export async function findLink(
-  props: Parameters<typeof db.query.links.findFirst>[0]
+  slug: string
+  // props: Parameters<typeof db.query.links.findFirst>[0]
 ) {
-  const link = await db.query.links.findFirst(props)
+  const link = await db.query.links.findFirst({ where: eq(links.slug, slug) })
 
   return link ? encodeId(link) : null
 }
@@ -39,10 +40,10 @@ function encodeId<T extends Record<string, unknown>>(obj: T): EncodedId<T> {
   const result: Partial<Record<keyof T, unknown>> = {}
   for (const key in obj) {
     if (key === 'id' && typeof obj[key] === 'number') {
-      result[key] = hashids.encode(obj[key])
+      result[key] = hashids.encode(obj[key] as number)
     }
     if (Array.isArray(obj[key])) {
-      result[key] = obj[key].map(encodeId)
+      result[key] = (obj[key] as T[]).map(encodeId)
     }
     if (typeof obj[key] === 'object') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,10 +61,10 @@ function decodeId<T extends Record<string, unknown>>(obj: T): DecodedId<T> {
   const result: Partial<Record<keyof T, unknown>> = {}
   for (const key in obj) {
     if (key === 'id' && typeof obj[key] === 'string') {
-      result[key] = hashids.decode(obj[key])
+      result[key] = hashids.decode(obj[key] as string)
     }
     if (Array.isArray(obj[key])) {
-      result[key] = obj[key].map(decodeId)
+      result[key] = (obj[key] as Record<string, unknown>[]).map(decodeId)
     }
     if (typeof obj[key] === 'object') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
