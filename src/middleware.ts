@@ -1,18 +1,23 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { createRemoteJWKSet, jwtVerify } from 'jose'
+import { type NextRequest, NextResponse } from 'next/server'
 
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)'])
+import { env } from './env'
 
-export default clerkMiddleware((auth, request) => {
-  if (!isPublicRoute(request)) {
-    auth().protect()
+const hankoApi = env.NEXT_PUBLIC_HANKO_API_URL
+
+export async function middleware(request: NextRequest) {
+  const hanko = request.cookies.get('hanko')?.value
+  const JWKS = createRemoteJWKSet(new URL(`${hankoApi}/.well-known/jwks.json`))
+  const loginRoute = request.nextUrl.clone()
+  loginRoute.pathname = '/login'
+
+  try {
+    await jwtVerify(hanko ?? '', JWKS)
+  } catch (error) {
+    return NextResponse.redirect(loginRoute)
   }
-})
+}
 
 export const config = {
-  matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
-  ],
+  matcher: ['/dashboard'],
 }
