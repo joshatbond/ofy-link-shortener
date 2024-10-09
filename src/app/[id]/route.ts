@@ -9,6 +9,6 @@ export async function GET(request: NextRequest) {
   const unknownRoute = request.nextUrl.clone()
   unknownRoute.pathname = '/unknown'
 
-  const link = await findLink(slug!)
+  const link = await findLink(slug)
   return NextResponse.redirect(link?.redirectUrl ?? unknownRoute)
 }
