@@ -9,10 +9,12 @@ const hankoUser = z.object({
   email: z.string().email(),
   created_at: z.string(),
   updated_at: z.string(),
-  username: z.string().nullable(),
-  webauthn_credentials: z.object({
-    id: z.string(),
-  }),
+  username: z.string().optional(),
+  webauthn_credentials: z.array(
+    z.object({
+      id: z.string(),
+    })
+  ),
 })
 
 export async function getUserData() {
