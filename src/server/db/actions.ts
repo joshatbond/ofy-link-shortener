@@ -8,11 +8,11 @@ import { links, users } from '@/server/db/schema'
 
 export async function createUserFromAuth(userId: string) {
   const user = await db.query.users.findFirst({
-    where: eq(users.clerkId, userId),
+    where: eq(users.authId, userId),
   })
   if (!user) {
     await db.insert(users).values({
-      clerkId: userId,
+      authId: userId,
       created: Math.floor(Date.now() / 1000),
     })
   }

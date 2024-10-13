@@ -12,7 +12,7 @@ export const createTable = pgTableCreator(name => `ofy-link-shortener_${name}`)
 
 export const users = createTable('users', {
   id: serial('id').primaryKey(),
-  clerkId: varchar('clerk_id').notNull(),
+  authId: varchar('auth_id').notNull(),
   created: integer('created_at').default(Math.floor(Date.now() / 1000)),
   isActive: boolean('is_active').default(true),
 })
