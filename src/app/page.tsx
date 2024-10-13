@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+
 export default function HomePage() {
   return (
     <main className="bg-neutral-800">
@@ -15,9 +17,13 @@ export default function HomePage() {
             ad-funded shorteners.
           </p>
 
-          <button className="w-full rounded bg-slate-700 px-3 py-2 text-lg font-semibold hover:bg-slate-600 focus-visible:bg-slate-600 active:bg-slate-600">
-            Sign in to get started
-          </button>
+          <Button
+            asChild
+            variant="link"
+            className="w-full rounded bg-slate-700 px-3 py-2 text-lg font-semibold hover:bg-slate-600 focus-visible:bg-slate-600 active:bg-slate-600"
+          >
+            <a href="/login">Sign in to get started</a>
+          </Button>
         </div>
       </div>
     </main>
