@@ -2,6 +2,8 @@ import { GeistSans } from 'geist/font/sans'
 import { type Metadata } from 'next'
 import Link from 'next/link'
 
+import { getUserData } from '@/auth/server/getUser'
+import { createUserFromAuth } from '@/server/db/actions'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
@@ -31,6 +33,14 @@ export default function RootLayout({
 }
 
 async function Header() {
+  getUserData()
+    .then(user => {
+      if (user) {
+        void createUserFromAuth(user.id)
+      }
+    })
+    .catch(console.error)
+
   return (
     <header className="bg-gradient-to-r from-neutral-950 to-gray-700/20">
       <nav className="flex flex-wrap items-center justify-between gap-4 p-4 font-semibold">
