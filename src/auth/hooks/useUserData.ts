@@ -3,8 +3,6 @@ import { useEffect, useState } from 'react'
 
 import { env } from '@/env'
 
-const hankoApi = env.NEXT_PUBLIC_HANKO_API_URL
-
 export function useUserData(): HankoUser {
   const [hanko, hankoAssign] = useState<Hanko>()
   const [userState, userStateAssign] = useState<HankoUser>({
@@ -13,7 +11,7 @@ export function useUserData(): HankoUser {
   })
 
   useEffect(() => {
-    hankoAssign(new Hanko(hankoApi))
+    hankoAssign(new Hanko(env.NEXT_PUBLIC_HANKO_API_URL))
   }, [])
 
   useEffect(() => {

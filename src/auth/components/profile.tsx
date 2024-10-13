@@ -5,11 +5,9 @@ import { useEffect } from 'react'
 
 import { env } from '@/env'
 
-const hankoApi = env.NEXT_PUBLIC_HANKO_API_URL
-
 export default function HankoProfile() {
   useEffect(() => {
-    register(hankoApi).catch(console.error)
+    register(env.NEXT_PUBLIC_HANKO_API_URL).catch(console.error)
   }, [])
 
   return <hanko-profile />

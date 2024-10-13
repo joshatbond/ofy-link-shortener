@@ -7,14 +7,12 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { env } from '@/env'
 
-const hankoApi = env.NEXT_PUBLIC_HANKO_API_URL
-
 export default function HankoLogout() {
   const router = useRouter()
   const [hanko, hankoAssign] = useState<Hanko>()
 
   useEffect(() => {
-    hankoAssign(new Hanko(hankoApi))
+    hankoAssign(new Hanko(env.NEXT_PUBLIC_HANKO_API_URL))
   }, [])
 
   const logout = async () => {
