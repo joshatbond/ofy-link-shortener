@@ -21,15 +21,19 @@ export async function getUserData() {
   const token = cookies().get('hanko')?.value ?? ''
   const { sub: userID } = decodeJwt(token)
 
-  const response = await fetch(
-    `${env.NEXT_PUBLIC_HANKO_API_URL}/users/${userID}`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  )
+  try {
+    const response = await fetch(
+      `${env.NEXT_PUBLIC_HANKO_API_URL}/users/${userID}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
 
-  if (!response.ok) return null
+    if (!response.ok) return null
 
-  const data = (await response.json()) as unknown
-  return hankoUser.parse(data)
+    const data = (await response.json()) as unknown
+    return hankoUser.parse(data)
+  } catch (_) {
+    return null
+  }
 }
