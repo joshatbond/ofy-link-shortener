@@ -1,6 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+  colors from figma:
+
+  text colors:
+  - primary: #ffffff
+  - secondary: #999999
+  - hover/focus: #30B9FF
+  - input placeholder: #93a3b8
+
+  backgrounds:
+  - navigation bar: #050504
+
+*/
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -80,14 +94,21 @@
   .card {
     background-color: #0a0a0a1f;
     box-shadow:
-      inset 0 25px 50px 0 #ffffff05,
-      inset 1px 1px 2px 0 #ffffff1f,
-      inset -32px -32px 120px 0 #ffffff05,
-      inset 40px 40px 120px 0 #ffffff05;
+      0px 25px 50px 0px rgba(255, 255, 255, 0.02) inset,
+      1px 1px 2px 0px rgba(255, 255, 255, 0.12) inset,
+      -32px -32px 120px 0px rgba(255, 255, 255, 0.05) inset,
+      40px 40px 120px 0px rgba(255, 255, 255, 0.05) inset;
+  }
+  .radial-gradient {
+    background: radial-gradient(
+      185.28% 185.28% at 50% 0%,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(0, 0, 0, 0.1) 100%
+    );
   }
   .gradient {
-    background: linear-gradient(to top, #0a0a0a80, #0a0a0a00),
-      linear-gradient(to right, #09090a00, #0f0f0f80);
+    background: linear-gradient(180deg, #00000000 0%, #000 100%),
+      linear-gradient(270deg, #000 0%, #00000000 100%), #0a0a0a;
   }
   hanko-auth {
     --container-max-width: 320px;

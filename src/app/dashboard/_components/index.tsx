@@ -1,19 +1,14 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { GlobeIcon, Settings2 } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -47,19 +42,28 @@ export function Dashboard(props: { links: Link[] }) {
   }, [activeLinkId, props.links])
 
   return (
-    <div className="p-4">
+    <div className="radial-gradient">
+      <form className="flex flex-1 justify-center gap-[6px] border-t border-[#979797] bg-[#050504] px-4 py-2 md:justify-start">
+        <Input
+          placeholder="Find or create a shortcut"
+          className="w-auto max-w-sm flex-1"
+        />
+
+        <Button variant="default" type="submit" className="bg-[#999999]">
+          Search
+        </Button>
+      </form>
+
       <Sheet>
-        <SheetContent>
+        <SheetContent className="h-full">
           {activeLink && <EditLink link={activeLink} />}
         </SheetContent>
 
-        <h1 className="mb-8 text-xl">Dashboard</h1>
-
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-x-6 gap-y-4 p-4">
           {props.links.map(link => (
             <LinkCard key={link.id} link={link}>
               <SheetTrigger onClick={() => activeLinkIdAssign(link.id)}>
-                Edit
+                <Settings2 className="focus-within:text-[#30b9ff] hover:text-[#30b9ff] active:text-[#30b9ff]" />
               </SheetTrigger>
             </LinkCard>
           ))}
@@ -75,20 +79,35 @@ export function Dashboard(props: { links: Link[] }) {
 
 function LinkCard(props: { link: Link; children?: ReactNode }) {
   return (
-    <Card className="min-w-80">
-      <CardHeader>
-        <CardTitle>{props.link.slug}</CardTitle>
-        <CardDescription>{props.link.description}</CardDescription>
-      </CardHeader>
+    <div className="card gradient flex min-w-[220px] flex-1 flex-col items-center gap-6 rounded-md p-6">
+      <h2 className="flex-1 self-stretch text-ellipsis text-xl font-bold leading-[20px] text-white">
+        {props.link.slug}
+      </h2>
 
-      <CardFooter className="justify-between">
+      <div className="flex items-center justify-between self-stretch">
         <Link href={props.link.redirectUrl} target="_blank">
-          Go to URL
+          <GlobeIcon className="focus-within:text-[#30b9ff] hover:text-[#30b9ff] active:text-[#30b9ff]" />
         </Link>
+
         {props.children}
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   )
+  // return (
+  //   <Card className="min-w-80">
+  //     <CardHeader>
+  //       <CardTitle>{props.link.slug}</CardTitle>
+  //     </CardHeader>
+
+  //     <CardFooter className="justify-between">
+  //       <Link href={props.link.redirectUrl} target="_blank">
+  //         Go to URL
+  //       </Link>
+
+  //       {props.children}
+  //     </CardFooter>
+  //   </Card>
+  // )
 }
 const formSchema = z.object({
   slug: z.string().min(1),
@@ -151,11 +170,31 @@ function FormItemWrapper(props: {
   label: string
   description?: string
 }) {
+  const [isOpen, isOpenAssign] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handlePointerEnter = () => {
+    timeoutRef.current = setTimeout(() => {
+      isOpenAssign(true)
+    }, 0.7e3)
+  }
+  const handlePointerLeave = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+
+    isOpenAssign(false)
+  }
+
   return (
     <TooltipProvider>
-      <Tooltip>
+      <Tooltip open={isOpen} defaultOpen={false}>
         <TooltipTrigger asChild>
-          <FormItem>
+          <FormItem
+            onPointerEnter={handlePointerEnter}
+            onPointerLeave={handlePointerLeave}
+          >
             <FormLabel>{props.label}</FormLabel>
             <FormControl>{props.children}</FormControl>
             <FormMessage />
