@@ -19,9 +19,9 @@ const hankoUser = z.object({
 
 export async function getUserData() {
   const token = cookies().get('hanko')?.value ?? ''
-  const { sub: userID } = decodeJwt(token)
 
   try {
+    const { sub: userID } = decodeJwt(token)
     const response = await fetch(
       `${env.NEXT_PUBLIC_HANKO_API_URL}/users/${userID}`,
       {
