@@ -4,6 +4,7 @@ import { type Metadata } from 'next'
 import { getUserData } from '@/auth/server/getUser'
 import { createUserFromAuth } from '@/server/db/actions'
 import '@/styles/globals.css'
+import { Toaster } from '@/components/ui/toaster'
 
 export const metadata: Metadata = {
   title: 'ShortCuts',
@@ -28,11 +29,14 @@ export default function RootLayout(
         <div className="grid min-h-screen grid-rows-[auto_1fr]">
           {props.children}
         </div>
+        
         <footer className="border-t border-t-neutral-700 p-4">
           <p className="text-end">
             &copy; {`${new Date().getFullYear()} J. Richardson`}
           </p>
         </footer>
+
+        <Toaster />
       </body>
     </html>
   )
