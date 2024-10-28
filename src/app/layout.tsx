@@ -3,6 +3,7 @@ import { type Metadata } from 'next'
 import Link from 'next/link'
 
 import '@/styles/globals.css'
+import { Toaster } from '@/components/ui/toaster'
 
 export const metadata: Metadata = {
   title: 'ShortCuts',
@@ -20,11 +21,14 @@ export default function RootLayout({
           <Header />
           {children}
         </div>
+        
         <footer className="border-t border-t-neutral-700 p-4">
           <p className="text-end">
             &copy; {`${new Date().getFullYear()} J. Richardson`}
           </p>
         </footer>
+
+        <Toaster />
       </body>
     </html>
   )
