@@ -3,21 +3,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { GlobeIcon, Settings2 } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+// import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form, FormField, FormItemWrapper } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
   Sheet,
@@ -26,12 +18,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Tooltip } from '@/components/ui/tooltip'
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { type findLinks } from '@/server/db/actions'
 
 export function Dashboard(props: { links: Link[] }) {
@@ -151,6 +137,9 @@ function EditLink(props: { link: Link }) {
               <FormItemWrapper
                 label="Slug"
                 description="This will be the name of the shortcut in the url"
+                side="bottom"
+                align="start"
+                sideOffset={-24}
               >
                 <Input placeholder="pathname" {...field} />
               </FormItemWrapper>
@@ -163,51 +152,6 @@ function EditLink(props: { link: Link }) {
         </form>
       </Form>
     </div>
-  )
-}
-function FormItemWrapper(props: {
-  children: ReactNode
-  label: string
-  description?: string
-}) {
-  const [isOpen, isOpenAssign] = useState(false)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const handlePointerEnter = () => {
-    timeoutRef.current = setTimeout(() => {
-      isOpenAssign(true)
-    }, 0.7e3)
-  }
-  const handlePointerLeave = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = null
-    }
-
-    isOpenAssign(false)
-  }
-
-  return (
-    <TooltipProvider>
-      <Tooltip open={isOpen} defaultOpen={false}>
-        <TooltipTrigger asChild>
-          <FormItem
-            onPointerEnter={handlePointerEnter}
-            onPointerLeave={handlePointerLeave}
-          >
-            <FormLabel>{props.label}</FormLabel>
-            <FormControl>{props.children}</FormControl>
-            <FormMessage />
-          </FormItem>
-        </TooltipTrigger>
-
-        <TooltipContent side="bottom" align="start" sideOffset={-24}>
-          {props.description && (
-            <FormDescription>{props.description}</FormDescription>
-          )}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
   )
 }
 
