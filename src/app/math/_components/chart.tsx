@@ -1,32 +1,24 @@
-import { useRef } from 'react';
-
-
-
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-
+import { forwardRef } from 'react'
 
 const STROKE = 1
 
-/**
- * A number only chart
- */
-export function Chart(props: {
-  width: number
-  height: number
-  xAxis: string[]
-  yAxis: string[]
-  /**
-   * points: An array of points. Each value corresponds to the element index from within the xAxis/yAxis arrays
-   */
-  points: Point[]
-  precision: number
-  useHorizontalGuidelines?: boolean
-  useVerticalGuidelines?: boolean
-  debug?: boolean
-}) {
-  const ref = useRef<SVGSVGElement>(null)
-  const { toast } = useToast()
+const Chart = forwardRef<
+  SVGSVGElement,
+  {
+    width: number
+    height: number
+    xAxis: string[]
+    yAxis: string[]
+    /**
+     * points: An array of points. Each value corresponds to the element index from within the xAxis/yAxis arrays
+     */
+    points: Point[]
+    precision: number
+    useHorizontalGuidelines?: boolean
+    useVerticalGuidelines?: boolean
+    debug?: boolean
+  }
+>((props, ref) => {
   const characters = props.yAxis.reduce(
     (a, v) => (a > v.length ? a : v.length),
     0
@@ -51,33 +43,9 @@ export function Chart(props: {
     x: x < 0 ? padding : coords.xs[x],
     y: y < 0 ? props.height - padding : coords.ys[y],
   }))
-  const handleCopy = () => {
-    if (!ref.current) return
-    console.log(ref.current)
-
-    const svgString = new XMLSerializer().serializeToString(ref.current)
-
-    navigator.clipboard
-      .writeText(svgString)
-      .then(() => {
-        toast({
-          title: 'Copied!',
-          description: 'The graph was copied to your clipboard.',
-        })
-      })
-      .catch(err => {
-        toast({
-          title: 'Failed to copy!',
-          description: 'See the console for the specific error.',
-          variant: 'destructive'
-        })
-
-        console.error('Failed to copy svg', err)
-      })
-  }
 
   return (
-    <div className='p-4'>
+    <div className="p-4">
       <svg ref={ref} viewBox={`0 0 ${props.width} ${props.height}`}>
         {props.debug ? (
           <>
@@ -115,7 +83,7 @@ export function Chart(props: {
           fontSize={FONT_SIZE}
           inlinePos={props.height - padding + FONT_SIZE * 2}
           blockPos={['', ...props.xAxis].map((x, index) => ({
-            label: `${x}`,
+            label: `${x === '_' ? '' : x}`,
             value:
               padding +
               (index / props.xAxis.length) * chartWidth -
@@ -139,7 +107,7 @@ export function Chart(props: {
           fontSize={FONT_SIZE}
           inlinePos={padding - FONT_SIZE * 1.5}
           blockPos={['', ...props.yAxis].map((y, index) => ({
-            label: `${y}`,
+            label: `${y === '_' ? '' : y}`,
             value:
               props.height -
               padding -
@@ -169,15 +137,13 @@ export function Chart(props: {
           </>
         ) : null}
       </svg>
-
-      <div className='flex justify-center'>
-      <Button className="w-full max-w-xs" onClick={handleCopy}>
-        Copy to Clipboard
-      </Button>
-      </div>
     </div>
   )
-}
+})
+Chart.displayName = 'Chart'
+
+export { Chart }
+
 function Line({
   start: { x: x1, y: y1 },
   end: { x: x2, y: y2 },
