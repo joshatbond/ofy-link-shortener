@@ -11,7 +11,7 @@ const tabRootVariants = cva('', {
     variant: {
       default: '',
       vertical:
-        'flex w-full rounded-md p-1 border-3 border-white text-muted-foreground gap-5',
+        'flex w-full rounded-md p-1 border-3 border-white text-muted-foreground gap-1',
     },
   },
   defaultVariants: {
