@@ -1,3 +1,4 @@
+import { Component, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -21,7 +22,9 @@ function LandingPage() {
           <img
             src="/logo.png"
             alt=""
-            className="hidden h-full w-full max-w-40 object-contain md:block xl:max-w-60"
+            width={480}
+            height={480}
+            className="hidden w-full max-w-40 object-contain md:block xl:max-w-60"
           />
           <div className="max-w-sm space-y-4">
             <h1 className="text-3xl">Link shortening without the hassle.</h1>
@@ -29,7 +32,7 @@ function LandingPage() {
               Your time is important. Skip the wait and privacy concerns of
               ad-funded shorteners.
             </p>
-            {convex ? <BackendStatus /> : null}
+            <BackendStatus />
           </div>
         </div>
       </main>
@@ -42,11 +45,54 @@ function LandingPage() {
 }
 
 function BackendStatus() {
-  const health = useQuery(api.health.check, {});
+  if (!convex) {
+    return <StatusText>Backend is not configured.</StatusText>;
+  }
 
   return (
-    <p className="text-sm text-neutral-500">
-      {health === undefined ? "Checking the backend…" : "Backend is ready."}
-    </p>
+    <HealthQueryBoundary>
+      <HealthStatus />
+    </HealthQueryBoundary>
   );
+}
+
+function HealthStatus() {
+  const health = useQuery(api.health.check, {});
+  if (health === undefined) {
+    return <StatusText>Checking the backend…</StatusText>;
+  }
+  if (health.ok) {
+    return <StatusText>Backend is ready.</StatusText>;
+  }
+  return <StatusText>Backend check failed.</StatusText>;
+}
+
+function StatusText({ children }: { children: string }) {
+  return <p className="text-sm text-neutral-500">{children}</p>;
+}
+
+type HealthQueryBoundaryProps = {
+  children: ReactNode;
+};
+
+type HealthQueryBoundaryState = {
+  failed: boolean;
+};
+
+class HealthQueryBoundary extends Component<
+  HealthQueryBoundaryProps,
+  HealthQueryBoundaryState
+> {
+  state: HealthQueryBoundaryState = { failed: false };
+
+  static getDerivedStateFromError(): HealthQueryBoundaryState {
+    return { failed: true };
+  }
+
+  render() {
+    if (this.state.failed) {
+      return <StatusText>Backend check failed.</StatusText>;
+    }
+    return this.props.children;
+  }
 }
