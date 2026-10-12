@@ -75,7 +75,7 @@ export function DevPasswordSignInForm() {
         password,
         flow: "signIn",
       });
-      await navigate({ to: "/dashboard" });
+      await navigate({ to: "/" });
     } catch (signInError) {
       try {
         await signIn("password", {
@@ -83,7 +83,7 @@ export function DevPasswordSignInForm() {
           password,
           flow: "signUp",
         });
-        await navigate({ to: "/dashboard" });
+        await navigate({ to: "/" });
       } catch (signUpError) {
         setError(
           signUpError instanceof Error
