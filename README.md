@@ -42,9 +42,9 @@ The dev password provider is also on when `SITE_URL` is `localhost` or `127.0.0.
 
 ## Public redirects
 
-One path segment that is not an app route (`/`, `/home`, `/login`, `/dashboard`, `/unknown`) or a static file (`favicon.ico`, `logo.png`, `/assets/*`) is a short link. Vercel Routing Middleware (`middleware.ts`) calls the Convex HTTP action `GET /redirect?slug=...`. There is no `/$slug` route in the SPA.
+One path segment that is not a reserved name is a short link. Reserved names are case-insensitive and are the same names rejected when a slug is saved: `home`, `login`, `dashboard`, `unknown`, `math`, `api`, `monitoring`, `assets`, `favicon.ico`, and `logo.png`. `/` and those names, with or without a trailing slash, stay on the SPA, as do files under `/assets/`. `favicon.ico` and `logo.png` are excluded literally, so a hyphenated slug such as `logo-png` is still a short link. Vercel Routing Middleware (`middleware.ts`) calls the Convex HTTP action `GET /redirect?slug=...`. There is no `/$slug` route in the SPA.
 
-An active link responds `307` to its stored `http` or `https` URL. An unknown, disabled, or expired slug responds `307` to `/unknown`. The lookup does not require a session. `/slug` and `/slug/` are the same link, and the slug match is case-sensitive.
+An active link responds `307` to its stored `http` or `https` URL. An unknown, disabled, or expired slug responds `307` to `/unknown`. The lookup does not require a session. `/slug` and `/slug/` are the same link. A stored slug is matched exactly, including case.
 
 The middleware reads `CONVEX_SITE_URL` when that variable is set on Vercel. Otherwise it reads `VITE_CONVEX_URL` and swaps a `.convex.cloud` host for `.convex.site`. That value has to be available at runtime, not only inlined into the client build. If neither variable is set, a slug request still redirects to `/unknown` instead of serving the SPA.
 

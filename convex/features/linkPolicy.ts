@@ -11,6 +11,10 @@ const RESERVED_SLUGS = new Set([
   "logo.png",
 ]);
 
+export function isReservedSlug(slug: string): boolean {
+  return RESERVED_SLUGS.has(slug.toLowerCase());
+}
+
 export function normalizeSlug(raw: string): string {
   const slug = raw
     .replace(/\s+/g, "-")
@@ -21,7 +25,7 @@ export function normalizeSlug(raw: string): string {
     throw new Error("Enter a slug.");
   }
 
-  if (RESERVED_SLUGS.has(slug.toLowerCase())) {
+  if (isReservedSlug(slug)) {
     throw new Error("That slug is reserved.");
   }
 

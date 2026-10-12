@@ -1,11 +1,12 @@
-import { assertRedirectUrl } from "../../convex/features/linkPolicy";
-
-const APP_SEGMENTS = new Set(["home", "login", "dashboard", "unknown"]);
-const STATIC_SEGMENTS = new Set(["favicon.ico", "logo.png", "assets"]);
+import {
+  assertRedirectUrl,
+  isReservedSlug,
+} from "../../convex/features/linkPolicy";
 
 /**
- * The slug to look up, or null when this path is the SPA or a static file.
- * `/slug` and `/slug/` are the same slug. Lookup stays case-sensitive.
+ * The slug to look up, or null when this path stays on the SPA.
+ * `/slug` and `/slug/` are the same slug. Reserved names match link policy
+ * and are case-insensitive. The returned slug keeps its stored case.
  */
 export function slugFromPathname(pathname: string): string | null {
   const segments = pathname.split("/").filter((segment) => segment.length > 0);
@@ -14,10 +15,7 @@ export function slugFromPathname(pathname: string): string | null {
   }
 
   const segment = segments[0];
-  if (segment === undefined) {
-    return null;
-  }
-  if (APP_SEGMENTS.has(segment) || STATIC_SEGMENTS.has(segment)) {
+  if (segment === undefined || isReservedSlug(segment)) {
     return null;
   }
 

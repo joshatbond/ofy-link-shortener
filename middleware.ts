@@ -7,7 +7,7 @@ import {
 
 export const config = {
   runtime: "nodejs",
-  matcher: ["/((?!assets/|favicon.ico|logo.png).*)"],
+  matcher: ["/((?!assets/|favicon\\.ico|logo\\.png).*)"],
 };
 
 export default async function middleware(request: Request) {

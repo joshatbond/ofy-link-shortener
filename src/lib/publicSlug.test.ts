@@ -26,6 +26,21 @@ describe("slug paths", () => {
     expect(slugFromPathname("/assets/index.js")).toBeNull();
   });
 
+  test("reserved names are case-insensitive and hyphenated lookalikes stay lookups", () => {
+    expect(slugFromPathname("/Login")).toBeNull();
+    expect(slugFromPathname("/Login/")).toBeNull();
+    expect(slugFromPathname("/HOME")).toBeNull();
+    expect(slugFromPathname("/HOME/")).toBeNull();
+    expect(slugFromPathname("/math")).toBeNull();
+    expect(slugFromPathname("/MATH/")).toBeNull();
+    expect(slugFromPathname("/Api")).toBeNull();
+    expect(slugFromPathname("/Monitoring")).toBeNull();
+    expect(slugFromPathname("/Favicon.ico")).toBeNull();
+    expect(slugFromPathname("/Logo.PNG")).toBeNull();
+    expect(slugFromPathname("/logo-png")).toBe("logo-png");
+    expect(slugFromPathname("/favicon-ico")).toBe("favicon-ico");
+  });
+
   test("more than one segment is not a lookup", () => {
     expect(slugFromPathname("/handbook/extra")).toBeNull();
     expect(slugFromPathname("/foo/bar/")).toBeNull();
