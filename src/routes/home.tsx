@@ -1,5 +1,4 @@
 import { Component, type ReactNode } from "react";
-import { useConvexAuth } from "@convex-dev/auth/react";
 import { Navigate, createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -19,9 +18,9 @@ function HomePage() {
 }
 
 function HomeSession() {
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const viewerId = useQuery(api.features.users.viewer, {});
 
-  if (isLoading) {
+  if (viewerId === undefined) {
     return (
       <MarketingPage
         signIn={<p className="text-sm text-neutral-400">Checking session…</p>}
@@ -29,7 +28,7 @@ function HomeSession() {
     );
   }
 
-  if (isAuthenticated) {
+  if (viewerId !== null) {
     return <Navigate to="/" replace />;
   }
 

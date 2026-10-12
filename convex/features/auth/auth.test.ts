@@ -58,6 +58,23 @@ describe("resolvePostAuthRedirect", () => {
       "https://sc.ofys.org/",
     );
   });
+
+  test("a foreign query is not copied onto SITE_URL", () => {
+    vi.stubEnv("SITE_URL", "https://sc.ofys.org");
+    vi.stubEnv("ALLOWED_SITE_URLS", "");
+
+    expect(
+      resolvePostAuthRedirect(
+        "https://evil.example/?next=https://evil.example",
+      ),
+    ).toBe("https://sc.ofys.org/");
+    expect(resolvePostAuthRedirect("/?next=https://evil.example")).toBe(
+      "https://sc.ofys.org/",
+    );
+    expect(
+      resolvePostAuthRedirect("https://sc.ofys.org/?next=https://evil.example"),
+    ).toBe("https://sc.ofys.org/");
+  });
 });
 
 describe("dev password provider", () => {

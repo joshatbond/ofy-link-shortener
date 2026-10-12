@@ -2,8 +2,9 @@ import { env } from "../../_generated/server";
 
 /**
  * Post-auth paths allowed for this app. Convex Auth `callbacks.redirect`
- * must return an absolute URL. Only `/` is allowed. It is not a prefix:
- * `/dashboard` and `/home` fall back to `/`.
+ * must return an absolute URL. Only a bare `/` is allowed. It is not a
+ * prefix: `/dashboard` and `/home` fall back to `/`. Query strings are
+ * dropped, including a query copied from a foreign origin.
  */
 const ALLOWED_PATH = "/";
 
@@ -71,11 +72,5 @@ function resolveAppPath(redirectTo: string | undefined | null): string {
     return FALLBACK_PATH;
   }
 
-  if (safe.startsWith("http")) {
-    const url = new URL(safe);
-    return `${path}${url.search}`;
-  }
-
-  const query = safe.includes("?") ? safe.slice(safe.indexOf("?")) : "";
-  return `${path}${query}`;
+  return ALLOWED_PATH;
 }
