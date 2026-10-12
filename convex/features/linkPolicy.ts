@@ -46,7 +46,13 @@ export function assertRedirectUrl(raw: string): string {
     throw new Error("Enter an http or https URL.");
   }
 
-  return redirectUrl;
+  if (parsed.username !== "" || parsed.password !== "") {
+    throw new Error(
+      "Enter an http or https URL without a username or password.",
+    );
+  }
+
+  return parsed.href;
 }
 
 export function normalizeDescription(value: string | null): string | undefined {

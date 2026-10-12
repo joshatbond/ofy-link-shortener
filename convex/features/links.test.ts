@@ -113,6 +113,52 @@ describe("link rules", () => {
     ).toMatchObject({ redirectUrl: "http://localhost:3000/path?q=1" });
   });
 
+  test("stores the parsed href so an embedded CR, LF, or NUL is not kept", async () => {
+    const { owner } = await twoMembers();
+
+    const withBreaks = await owner.client.mutation(api.features.links.create, {
+      slug: "breaks",
+      redirectUrl: "https://example.com/\r\nSet-Cookie: a=b",
+    });
+    expect(
+      await owner.client.query(api.features.links.get, { linkId: withBreaks }),
+    ).toMatchObject({
+      redirectUrl: "https://example.com/Set-Cookie:%20a=b",
+    });
+
+    const withNul = await owner.client.mutation(api.features.links.create, {
+      slug: "nul",
+      redirectUrl: "\0https://example.com",
+    });
+    expect(
+      await owner.client.query(api.features.links.get, { linkId: withNul }),
+    ).toMatchObject({
+      redirectUrl: "https://example.com/",
+    });
+  });
+
+  test("rejects a javascript URL hidden with a tab", async () => {
+    const { owner } = await twoMembers();
+
+    await expect(
+      owner.client.mutation(api.features.links.create, {
+        slug: "script",
+        redirectUrl: "java\tscript:alert(1)",
+      }),
+    ).rejects.toThrow(/http or https/);
+  });
+
+  test("rejects a redirect URL that contains userinfo", async () => {
+    const { owner } = await twoMembers();
+
+    await expect(
+      owner.client.mutation(api.features.links.create, {
+        slug: "creds",
+        redirectUrl: "https://user:pass@example.com/a",
+      }),
+    ).rejects.toThrow(/username or password/);
+  });
+
   test.each([
     "ftp://example.com",
     "javascript:alert(1)",
@@ -435,6 +481,49 @@ describe("link shares", () => {
     expect(
       await second.client.query(api.features.links.listSharedWithMe, {}),
     ).toEqual([]);
+  });
+
+  test("deleteLink deletes that link's share rows", async () => {
+    const t = initConvexTest();
+    const owner = await asAuthedUser(t, {
+      email: "owner@ofy.org",
+      name: "Owner",
+    });
+    await asAuthedUser(t, { email: "second@ofy.org", name: "Second" });
+    const linkId = await owner.client.mutation(api.features.links.create, {
+      slug: "handbook",
+      redirectUrl: "https://example.com/handbook",
+    });
+    const keptId = await owner.client.mutation(api.features.links.create, {
+      slug: "keep",
+      redirectUrl: "https://example.com/keep",
+    });
+    await owner.client.mutation(api.features.links.share, {
+      linkId,
+      email: "second@ofy.org",
+    });
+    await owner.client.mutation(api.features.links.share, {
+      linkId: keptId,
+      email: "second@ofy.org",
+    });
+
+    await owner.client.mutation(api.features.links.deleteLink, { linkId });
+
+    const deletedShares = await t.run(async (ctx) => {
+      return await ctx.db
+        .query("linkShares")
+        .withIndex("by_link_and_user", (q) => q.eq("linkId", linkId))
+        .collect();
+    });
+    const keptShares = await t.run(async (ctx) => {
+      return await ctx.db
+        .query("linkShares")
+        .withIndex("by_link_and_user", (q) => q.eq("linkId", keptId))
+        .collect();
+    });
+    expect(deletedShares).toEqual([]);
+    expect(keptShares).toHaveLength(1);
+    expect(keptShares[0]?.linkId).toBe(keptId);
   });
 
   test("share target must be another existing @ofy.org user", async () => {
