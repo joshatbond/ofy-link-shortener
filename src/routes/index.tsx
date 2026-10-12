@@ -1,7 +1,7 @@
 import { Navigate, createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { SignOutButton } from "../components/auth/sign-out-button";
+import { SignedInDashboard } from "../components/dashboard/signed-in-dashboard";
 import { PageFrame } from "../components/page-frame";
 import { convex } from "../lib/convex";
 
@@ -39,15 +39,3 @@ function DashboardSession() {
   );
 }
 
-function SignedInDashboard() {
-  const profile = useQuery(api.features.users.viewerProfile, {});
-  const label = profile?.name ?? profile?.email ?? "Signed in.";
-
-  return (
-    <div className="mx-auto flex max-w-sm flex-col gap-4">
-      <h1 className="text-3xl">Dashboard</h1>
-      <p className="text-neutral-400">{label}</p>
-      <SignOutButton />
-    </div>
-  );
-}
