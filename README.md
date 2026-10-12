@@ -32,13 +32,21 @@ Set these on the Convex deployment. Set `VITE_CONVEX_URL` on Vercel as well.
 | `AUTH_GOOGLE_SECRET` | Yes, for Google sign-in | Google OAuth client secret. |
 | `SITE_URL` | Yes | Canonical app origin. Production is `https://sc.ofys.org`. Missing `SITE_URL` rejects post-login redirects. |
 | `ALLOWED_SITE_URLS` | No | Comma-separated extra origins that may receive the post-login redirect. |
-| `VITE_CONVEX_URL` | Yes, for the SPA | Absolute Convex cloud URL. Inlined at build time. |
+| `VITE_CONVEX_URL` | Yes, for the SPA and slug redirects | Absolute Convex cloud URL. Inlined at build time, and read at runtime by the slug middleware. |
 | `DEV_PASSWORD_AUTH` | No | Set to `true` to enable the dev password provider. Leave unset in production. |
 | `INVITE_DEV_RELAXED` | No | Set to `true` to enable the dev password provider. Leave unset in production. |
 
 The dev password provider is also on when `SITE_URL` is `localhost` or `127.0.0.1`. It is off for any other host unless one of those flags is `true`. Minimum password length is 4 characters.
 
-`CONVEX_SITE_URL` is provided by Convex for the auth JWT issuer. Do not set it manually.
+`CONVEX_SITE_URL` on the Convex deployment is provided by Convex for the auth JWT issuer. Do not set that one manually.
+
+## Public redirects
+
+One path segment that is not a reserved name is a short link. Reserved names are case-insensitive and are the same names rejected when a slug is saved: `home`, `login`, `dashboard`, `unknown`, `math`, `api`, `monitoring`, `assets`, `favicon.ico`, and `logo.png`. `/` and those names, with or without a trailing slash, stay on the SPA, as do files under `/assets/`. `favicon.ico` and `logo.png` are excluded literally, so a hyphenated slug such as `logo-png` is still a short link. Vercel Routing Middleware (`middleware.ts`) calls the Convex HTTP action `GET /redirect?slug=...`. There is no `/$slug` route in the SPA.
+
+An active link responds `307` to its stored `http` or `https` URL. The short link’s query string is merged onto that destination: new keys are added, the same key replaces the destination’s values, and the destination hash stays. An empty query changes nothing. An unknown, disabled, or expired slug responds `307` to `/unknown` with no query string and no destination. The lookup does not require a session. `/slug` and `/slug/` are the same link. A stored slug is matched exactly, including case.
+
+The middleware reads `CONVEX_SITE_URL` when that variable is set on Vercel. Otherwise it reads `VITE_CONVEX_URL` and swaps a `.convex.cloud` host for `.convex.site`. That value has to be available at runtime, not only inlined into the client build. If neither variable is set, a slug request still redirects to `/unknown` instead of serving the SPA.
 
 ## Scripts
 

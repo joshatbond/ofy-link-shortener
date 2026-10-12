@@ -4,6 +4,9 @@
   "installCommand": "bun install",
   "buildCommand": "bun run build",
   "outputDirectory": "dist",
+  "proxy": {
+    "entrypoint": "middleware.ts"
+  },
   "rewrites": [
     {
       "source": "/(.*)",
