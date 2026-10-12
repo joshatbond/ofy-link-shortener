@@ -2,11 +2,12 @@ import { env } from "../../_generated/server";
 
 /**
  * Post-auth paths allowed for this app. Convex Auth `callbacks.redirect`
- * must return an absolute URL. Anything else falls back to `/dashboard`.
+ * must return an absolute URL. Only `/` is allowed. It is not a prefix:
+ * `/dashboard` and `/home` fall back to `/`.
  */
-const ALLOWED_APP_BASE_PATHS = ["/dashboard"] as const;
+const ALLOWED_PATH = "/";
 
-const FALLBACK_PATH = "/dashboard";
+const FALLBACK_PATH = "/";
 
 export function resolvePostAuthRedirect(
   redirectTo: string | undefined | null,
@@ -65,11 +66,8 @@ function resolveAppPath(redirectTo: string | undefined | null): string {
   const path = safe.startsWith("http")
     ? new URL(safe).pathname
     : (safe.split("?")[0] ?? safe);
-  const allowed = ALLOWED_APP_BASE_PATHS.some(
-    (base) => path === base || path.startsWith(`${base}/`),
-  );
 
-  if (!allowed) {
+  if (path !== ALLOWED_PATH) {
     return FALLBACK_PATH;
   }
 

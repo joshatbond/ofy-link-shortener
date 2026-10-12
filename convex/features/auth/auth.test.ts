@@ -21,30 +21,41 @@ describe("resolvePostAuthRedirect", () => {
     vi.stubEnv("SITE_URL", "");
     vi.stubEnv("ALLOWED_SITE_URLS", "https://sc.ofys.org");
 
-    expect(() => resolvePostAuthRedirect("/dashboard")).toThrow(
+    expect(() => resolvePostAuthRedirect("/")).toThrow(
       /SITE_URL is not configured/,
     );
   });
 
-  test("disallowed redirectTo falls back to /dashboard", () => {
+  test("/ is allowed", () => {
     vi.stubEnv("SITE_URL", "https://sc.ofys.org");
     vi.stubEnv("ALLOWED_SITE_URLS", "");
 
-    expect(resolvePostAuthRedirect("/evil")).toBe(
-      "https://sc.ofys.org/dashboard",
+    expect(resolvePostAuthRedirect("/")).toBe("https://sc.ofys.org/");
+    expect(resolvePostAuthRedirect("https://sc.ofys.org/")).toBe(
+      "https://sc.ofys.org/",
     );
-    expect(resolvePostAuthRedirect(null)).toBe("https://sc.ofys.org/dashboard");
-    expect(resolvePostAuthRedirect("https://evil.example/steal")).toBe(
-      "https://sc.ofys.org/dashboard",
-    );
-    expect(resolvePostAuthRedirect("/dashboard")).toBe(
-      "https://sc.ofys.org/dashboard",
-    );
+  });
+
+  test("/dashboard falls back and is not an open redirect", () => {
+    vi.stubEnv("SITE_URL", "https://sc.ofys.org");
+    vi.stubEnv("ALLOWED_SITE_URLS", "");
+
+    expect(resolvePostAuthRedirect("/dashboard")).toBe("https://sc.ofys.org/");
     expect(resolvePostAuthRedirect("/dashboard/links?tab=mine")).toBe(
-      "https://sc.ofys.org/dashboard/links?tab=mine",
+      "https://sc.ofys.org/",
     );
-    expect(resolvePostAuthRedirect("https://sc.ofys.org/dashboard")).toBe(
-      "https://sc.ofys.org/dashboard",
+    expect(resolvePostAuthRedirect("/home")).toBe("https://sc.ofys.org/");
+    expect(resolvePostAuthRedirect("https://evil.example/dashboard")).toBe(
+      "https://sc.ofys.org/",
+    );
+  });
+
+  test("https://evil.example/ is rejected", () => {
+    vi.stubEnv("SITE_URL", "https://sc.ofys.org");
+    vi.stubEnv("ALLOWED_SITE_URLS", "");
+
+    expect(resolvePostAuthRedirect("https://evil.example/")).toBe(
+      "https://sc.ofys.org/",
     );
   });
 });

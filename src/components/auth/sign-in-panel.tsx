@@ -12,8 +12,7 @@ export function SignInPanel() {
 
   return (
     <div className="mx-auto flex max-w-sm flex-col gap-6">
-      <h1 className="text-3xl">Sign in</h1>
-      {showGoogle ? <GoogleSignInButton redirectTo="/dashboard" /> : null}
+      {showGoogle ? <GoogleSignInButton redirectTo="/" /> : null}
       {showDevPassword ? <DevPasswordSignInForm /> : null}
       {resolved && !showGoogle && !showDevPassword ? (
         <p className="text-sm text-neutral-400">
