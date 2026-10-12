@@ -1,5 +1,5 @@
+import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { ConvexProvider } from "convex/react";
 import { convex } from "../lib/convex";
 
 export const Route = createRootRoute({
@@ -17,5 +17,19 @@ function RootLayout() {
     return shell;
   }
 
-  return <ConvexProvider client={convex}>{shell}</ConvexProvider>;
+  return (
+    <ConvexAuthProvider
+      client={convex}
+      replaceURL={(relativeUrl) => {
+        const url = new URL(relativeUrl, window.location.origin);
+        window.history.replaceState(
+          {},
+          "",
+          `${url.pathname}${url.search}${url.hash}`,
+        );
+      }}
+    >
+      {shell}
+    </ConvexAuthProvider>
+  );
 }

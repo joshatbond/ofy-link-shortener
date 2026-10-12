@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { convex } from "../lib/convex";
@@ -12,8 +12,11 @@ function LandingPage() {
   return (
     <>
       <header className="bg-gradient-to-r from-neutral-950 to-gray-700/20">
-        <nav className="p-4 font-semibold">
+        <nav className="flex items-center justify-between p-4 font-semibold">
           <span className="text-2xl">ShortCuts</span>
+          <Link to="/login" className="text-sm font-medium underline">
+            Sign in
+          </Link>
         </nav>
       </header>
 
