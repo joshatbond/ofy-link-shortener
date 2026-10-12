@@ -1,16 +1,19 @@
-# OFY Link Shortener
+# ShortCuts
 
-## TODO
+## Setup
 
-- [x] Make it deploy (w/ vercel)
-- [x] Scaffold basic ui with mock data
-- [x] Set up a batabase (w/ vercel postgres)
-- [x] Add authentication (w/ clerk)
-- [ ] Attach database to UI
-  - [x] Scaffold `/dashboard` page table
-  - [ ] Scaffold `/dashboard/[id]` CRUD form
-  - [ ] Scaffold redirect route for `/[id]`
-- [ ] Error management (w/ setry)
-- [ ] Redirect valid links to the original URL
-- [ ] Analytics (w/ posthog)
-- [ ] Ratelimiting (w/ upstash)
+```bash
+bun install
+```
+
+Copy `.env.example` to `.env.local` and set `VITE_CONVEX_URL` when you have a Convex deployment. The landing page loads without it.
+
+## Scripts
+
+```bash
+bun run dev
+bun run test
+bun run lint
+bun run typecheck
+bun run build
+```
