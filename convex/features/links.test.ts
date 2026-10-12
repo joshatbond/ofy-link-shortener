@@ -202,6 +202,84 @@ describe("link rules", () => {
     ).rejects.toThrow(/reserved/i);
   });
 
+  test("replaces whitespace with hyphens and keeps letter case", async () => {
+    const { owner } = await twoMembers();
+
+    const linkId = await owner.client.mutation(api.features.links.create, {
+      slug: "  My   Link  ",
+      redirectUrl: "https://example.com/mine",
+    });
+    expect(
+      await owner.client.query(api.features.links.get, { linkId }),
+    ).toMatchObject({ slug: "My-Link" });
+
+    await owner.client.mutation(api.features.links.update, {
+      linkId,
+      slug: "--My--Link--",
+    });
+    expect(
+      await owner.client.query(api.features.links.get, { linkId }),
+    ).toMatchObject({ slug: "My-Link" });
+
+    await owner.client.mutation(api.features.links.update, {
+      linkId,
+      slug: "My - Link",
+    });
+    expect(
+      await owner.client.query(api.features.links.get, { linkId }),
+    ).toMatchObject({ slug: "My-Link" });
+  });
+
+  test("Handbook and handbook are different slugs", async () => {
+    const { owner } = await twoMembers();
+
+    const upper = await owner.client.mutation(api.features.links.create, {
+      slug: "Handbook",
+      redirectUrl: "https://example.com/upper",
+    });
+    const lower = await owner.client.mutation(api.features.links.create, {
+      slug: "handbook",
+      redirectUrl: "https://example.com/lower",
+    });
+
+    expect(
+      await owner.client.query(api.features.links.get, { linkId: upper }),
+    ).toMatchObject({ slug: "Handbook" });
+    expect(
+      await owner.client.query(api.features.links.get, { linkId: lower }),
+    ).toMatchObject({ slug: "handbook" });
+
+    await expect(
+      owner.client.mutation(api.features.links.create, {
+        slug: "Handbook",
+        redirectUrl: "https://example.com/again",
+      }),
+    ).rejects.toThrow(/already in use/i);
+  });
+
+  test.each([
+    "---",
+    "-",
+    " - ",
+    "My-Link!",
+    "a?b",
+    "a#b",
+    "a\\b",
+    ".",
+    "..",
+    "a.b",
+    "hello_world",
+  ])("rejects slug %j instead of deleting characters", async (slug) => {
+    const { owner } = await twoMembers();
+
+    await expect(
+      owner.client.mutation(api.features.links.create, {
+        slug,
+        redirectUrl: "https://example.com",
+      }),
+    ).rejects.toThrow(/slug/i);
+  });
+
   test("slug is unique across owners", async () => {
     const { owner, other } = await twoMembers();
 

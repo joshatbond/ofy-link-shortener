@@ -12,18 +12,21 @@ const RESERVED_SLUGS = new Set([
 ]);
 
 export function normalizeSlug(raw: string): string {
-  const slug = raw.trim();
+  const slug = raw
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
   if (slug.length === 0) {
     throw new Error("Enter a slug.");
   }
 
-  if (slug.includes("/")) {
-    throw new Error("Slug cannot contain a slash.");
-  }
-
   if (RESERVED_SLUGS.has(slug.toLowerCase())) {
     throw new Error("That slug is reserved.");
+  }
+
+  if (!/^[A-Za-z0-9-]+$/.test(slug)) {
+    throw new Error("Slug can only contain letters, digits, and hyphens.");
   }
 
   return slug;
