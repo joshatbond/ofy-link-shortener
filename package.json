@@ -18,6 +18,7 @@
     "@auth/core": "0.41.1",
     "@convex-dev/auth": "0.0.96",
     "@tanstack/react-router": "^1.170.42",
+    "@vercel/functions": "^3.9.11",
     "convex": "^1.46.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
@@ -27,6 +28,7 @@
     "@edge-runtime/vm": "^5.0.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/router-plugin": "^1.168.43",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",

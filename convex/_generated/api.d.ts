@@ -19,6 +19,7 @@ import type * as features_auth_redirect from "../features/auth/redirect.js";
 import type * as features_linkPolicy from "../features/linkPolicy.js";
 import type * as features_linkStore from "../features/linkStore.js";
 import type * as features_links from "../features/links.js";
+import type * as features_redirect from "../features/redirect.js";
 import type * as features_users from "../features/users.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   "features/linkPolicy": typeof features_linkPolicy;
   "features/linkStore": typeof features_linkStore;
   "features/links": typeof features_links;
+  "features/redirect": typeof features_redirect;
   "features/users": typeof features_users;
   health: typeof health;
   http: typeof http;

@@ -4,6 +4,10 @@
   "installCommand": "bun install",
   "buildCommand": "bun run build",
   "outputDirectory": "dist",
+  "proxy": {
+    "entrypoint": "middleware.ts",
+    "matcher": ["/((?!assets/|favicon.ico|logo.png).*)"]
+  },
   "rewrites": [
     {
       "source": "/(.*)",
