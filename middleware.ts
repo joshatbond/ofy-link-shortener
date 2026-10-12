@@ -1,5 +1,6 @@
 import { next } from "@vercel/functions";
 import {
+  applyShortLinkQuery,
   convexSiteOrigin,
   forwardLocation,
   slugFromPathname,
@@ -11,7 +12,8 @@ export const config = {
 };
 
 export default async function middleware(request: Request) {
-  const slug = slugFromPathname(new URL(request.url).pathname);
+  const requestUrl = new URL(request.url);
+  const slug = slugFromPathname(requestUrl.pathname);
   if (slug === null) {
     return next();
   }
@@ -20,10 +22,21 @@ export default async function middleware(request: Request) {
   return new Response(null, {
     status: 307,
     headers: {
-      Location: location ?? "/unknown",
+      Location: locationWithRequestQuery(location, requestUrl),
       "Cache-Control": "no-store",
     },
   });
+}
+
+/** Query merging runs only after an active http(s) lookup. */
+function locationWithRequestQuery(
+  location: string | null,
+  requestUrl: URL,
+): string {
+  if (location === null || location === "/unknown") {
+    return "/unknown";
+  }
+  return applyShortLinkQuery(location, requestUrl);
 }
 
 async function lookupLocation(slug: string): Promise<string | null> {

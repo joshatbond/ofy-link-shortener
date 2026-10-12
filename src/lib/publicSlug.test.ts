@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  applyShortLinkQuery,
   convexSiteOrigin,
   forwardLocation,
   slugFromPathname,
@@ -68,6 +69,104 @@ describe("convex site origin", () => {
   test("returns null when no absolute http(s) URL is configured", () => {
     expect(convexSiteOrigin({})).toBeNull();
     expect(convexSiteOrigin({ VITE_CONVEX_URL: "convex.cloud" })).toBeNull();
+  });
+});
+
+describe("short-link query", () => {
+  test("adds a param to a bare destination", () => {
+    const location = applyShortLinkQuery(
+      "https://example.com/stored",
+      new URL("https://sc.ofys.org/Handbook?ref=1"),
+    );
+
+    expect(location).toBe("https://example.com/stored?ref=1");
+    const url = new URL(location);
+    expect(url.origin).toBe("https://example.com");
+    expect(url.pathname).toBe("/stored");
+  });
+
+  test("merges with an existing destination query", () => {
+    const url = new URL(
+      applyShortLinkQuery(
+        "https://example.com/stored?utm=dest",
+        new URL("https://sc.ofys.org/Handbook?ref=1"),
+      ),
+    );
+
+    expect(url.origin).toBe("https://example.com");
+    expect(url.pathname).toBe("/stored");
+    expect(url.searchParams.get("utm")).toBe("dest");
+    expect(url.searchParams.get("ref")).toBe("1");
+    expect(url.hash).toBe("");
+  });
+
+  test("short-link values replace the same destination key", () => {
+    const url = new URL(
+      applyShortLinkQuery(
+        "https://example.com/stored?ref=old&other=1",
+        new URL("https://sc.ofys.org/Handbook?ref=1"),
+      ),
+    );
+
+    expect(url.origin).toBe("https://example.com");
+    expect(url.pathname).toBe("/stored");
+    expect(url.searchParams.getAll("ref")).toEqual(["1"]);
+    expect(url.searchParams.get("other")).toBe("1");
+  });
+
+  test("passes repeated keys", () => {
+    const url = new URL(
+      applyShortLinkQuery(
+        "https://example.com/stored?tag=keep&color=blue",
+        new URL("https://sc.ofys.org/Handbook?tag=a&tag=b"),
+      ),
+    );
+
+    expect(url.origin).toBe("https://example.com");
+    expect(url.pathname).toBe("/stored");
+    expect(url.searchParams.getAll("tag")).toEqual(["a", "b"]);
+    expect(url.searchParams.get("color")).toBe("blue");
+  });
+
+  test("preserves the destination hash", () => {
+    expect(
+      applyShortLinkQuery(
+        "https://example.com/stored?a=1#section",
+        new URL("https://sc.ofys.org/Handbook?ref=1"),
+      ),
+    ).toBe("https://example.com/stored?a=1&ref=1#section");
+  });
+
+  test("an empty query leaves the destination unchanged", () => {
+    const location = "https://example.com/stored?a=1#section";
+    expect(
+      applyShortLinkQuery(location, new URL("https://sc.ofys.org/Handbook")),
+    ).toBe(location);
+    expect(
+      applyShortLinkQuery(location, new URL("https://sc.ofys.org/Handbook?")),
+    ).toBe(location);
+  });
+
+  test("encodes CR and LF so a param cannot inject headers", () => {
+    const location = applyShortLinkQuery(
+      "https://example.com/stored",
+      new URL("https://sc.ofys.org/Handbook?ref=1%0D%0ASet-Cookie:%20evil"),
+    );
+
+    expect(location).not.toMatch(/[\u0000\r\n]/);
+    const url = new URL(location);
+    expect(url.origin).toBe("https://example.com");
+    expect(url.pathname).toBe("/stored");
+    expect(url.searchParams.get("ref")).toBe("1\r\nSet-Cookie: evil");
+  });
+
+  test("does not add a query to /unknown", () => {
+    expect(
+      applyShortLinkQuery(
+        "/unknown",
+        new URL("https://sc.ofys.org/missing?ref=1"),
+      ),
+    ).toBe("/unknown");
   });
 });
 
