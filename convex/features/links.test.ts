@@ -6,6 +6,7 @@ import { asAuthedUser, initConvexTest } from "../test.setup";
 const RESERVED_SLUGS = [
   "login",
   "dashboard",
+  "home",
   "unknown",
   "math",
   "api",

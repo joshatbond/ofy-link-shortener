@@ -1,6 +1,7 @@
 const RESERVED_SLUGS = new Set([
   "login",
   "dashboard",
+  "home",
   "unknown",
   "math",
   "api",
