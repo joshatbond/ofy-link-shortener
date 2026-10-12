@@ -1,16 +1,29 @@
-# OFY Link Shortener
+# ShortCuts
 
-## TODO
+## Setup
 
-- [x] Make it deploy (w/ vercel)
-- [x] Scaffold basic ui with mock data
-- [x] Set up a batabase (w/ vercel postgres)
-- [x] Add authentication (w/ clerk)
-- [ ] Attach database to UI
-  - [x] Scaffold `/dashboard` page table
-  - [ ] Scaffold `/dashboard/[id]` CRUD form
-  - [ ] Scaffold redirect route for `/[id]`
-- [ ] Error management (w/ setry)
-- [ ] Redirect valid links to the original URL
-- [ ] Analytics (w/ posthog)
-- [ ] Ratelimiting (w/ upstash)
+```bash
+bun install
+```
+
+`VITE_CONVEX_URL` is inlined when Vite builds or serves the app. Set it before `bun run dev` or `bun run build`. If it is missing, or it is not an absolute `http://` or `https://` URL, the landing page says the backend is not configured.
+
+For local development, copy `.env.example` to `.env.local`. `bunx convex dev` writes `VITE_CONVEX_URL` into that file.
+
+Agents must use an isolated deployment:
+
+```bash
+CONVEX_AGENT_MODE=anonymous bunx convex dev
+```
+
+On Vercel, set `VITE_CONVEX_URL` in the project environment before the build. A value added only at runtime is not visible to the client.
+
+## Scripts
+
+```bash
+bun run dev
+bun run test
+bun run lint
+bun run typecheck
+bun run build
+```
