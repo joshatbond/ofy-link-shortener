@@ -19,22 +19,29 @@ export function LinkForm(props: {
   expiryHint: string;
   onSubmit: (draft: LinkDraft) => Promise<void>;
   onCancel: () => void;
+  appearance?: "panel" | "plain";
+  onPendingChange?: (pending: boolean) => void;
 }) {
   const [draft, setDraft] = useState(props.initial);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const slugMessage = slugFieldMessage(draft.slug);
+  const framed = props.appearance !== "plain";
 
   return (
     <form
-      className="space-y-3 rounded-md border border-neutral-700 bg-neutral-950 p-4"
+      className={
+        framed
+          ? "space-y-3 rounded-md border border-neutral-700 bg-neutral-950 p-4"
+          : "space-y-3"
+      }
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
         void handleSubmit();
       }}
     >
-      <h3 className="text-lg">{props.heading}</h3>
+      {framed ? <h3 className="text-lg">{props.heading}</h3> : null}
       <label className="flex flex-col gap-1 text-sm">
         <span>Slug</span>
         <input
@@ -117,9 +124,14 @@ export function LinkForm(props: {
     setError(null);
   }
 
+  function updatePending(value: boolean) {
+    setPending(value);
+    props.onPendingChange?.(value);
+  }
+
   async function handleSubmit() {
     setError(null);
-    setPending(true);
+    updatePending(true);
 
     try {
       await props.onSubmit(draft);
@@ -131,7 +143,7 @@ export function LinkForm(props: {
       }
       setError(message);
     } finally {
-      setPending(false);
+      updatePending(false);
     }
   }
 }

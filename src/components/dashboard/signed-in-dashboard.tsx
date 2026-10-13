@@ -10,6 +10,14 @@ import {
   type LinkDraft,
 } from "../../lib/dashboardLinks";
 import { SignOutButton } from "../auth/sign-out-button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { OwnerLinkCard, SharedLinkCard, type DashboardLink } from "./link-card";
 import { LinkForm } from "./link-form";
 import { ShareManager } from "./share-manager";
@@ -46,6 +54,7 @@ function DashboardContent() {
   const updateLink = useMutation(api.features.links.update);
   const [query, setQuery] = useState("");
   const [panel, setPanel] = useState<Panel | null>(null);
+  const [createPending, setCreatePending] = useState(false);
   const now = Date.now();
 
   const myLinks = mine === undefined ? undefined : filterListedLinks(mine, query);
@@ -85,34 +94,53 @@ function DashboardContent() {
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl">My links</h2>
-          <button
-            type="button"
-            className={primaryButtonClass}
-            aria-expanded={panel?.kind === "create"}
-            onClick={() =>
+          <Dialog
+            open={panel?.kind === "create"}
+            onOpenChange={(open) => {
+              if (open) {
+                setPanel({ kind: "create" });
+                return;
+              }
+              if (createPending) {
+                return;
+              }
               setPanel((current) =>
-                current?.kind === "create" ? null : { kind: "create" },
-              )
-            }
-          >
-            New link
-          </button>
-        </div>
-
-        {panel?.kind === "create" ? (
-          <LinkForm
-            heading="New link"
-            submitLabel="Create link"
-            pendingLabel="Creating…"
-            initial={emptyDraft}
-            expiryHint="Leave blank to keep the link until you disable or delete it."
-            onCancel={() => setPanel(null)}
-            onSubmit={async (draft) => {
-              await createLink(createLinkFields(draft));
-              setPanel(null);
+                current?.kind === "create" ? null : current,
+              );
             }}
-          />
-        ) : null}
+          >
+            <DialogTrigger asChild>
+              <button type="button" className={primaryButtonClass}>
+                New link
+              </button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[calc(100%-2rem)] overflow-y-auto border border-neutral-700 bg-neutral-950 text-base text-neutral-50 ring-0 sm:max-w-lg">
+              <DialogHeader className="pr-8">
+                <DialogTitle className="text-lg font-normal text-neutral-50">
+                  New link
+                </DialogTitle>
+                <DialogDescription className="sr-only">
+                  Create a short link with a slug, destination, and optional
+                  description or expiry.
+                </DialogDescription>
+              </DialogHeader>
+              <LinkForm
+                appearance="plain"
+                heading="New link"
+                submitLabel="Create link"
+                pendingLabel="Creating…"
+                initial={emptyDraft}
+                expiryHint="Leave blank to keep the link until you disable or delete it."
+                onPendingChange={setCreatePending}
+                onCancel={() => setPanel(null)}
+                onSubmit={async (draft) => {
+                  await createLink(createLinkFields(draft));
+                  setPanel(null);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
 
         {panel?.kind === "edit" ? (
           mine === undefined ? (
