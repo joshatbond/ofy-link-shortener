@@ -1,9 +1,11 @@
 import { Navigate, createFileRoute } from "@tanstack/react-router";
+import { useConvexAuth } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { SignedInDashboard } from "../components/dashboard/signed-in-dashboard";
 import { PageFrame } from "../components/page-frame";
 import { convex } from "../lib/convex";
+import { sessionRoute } from "../lib/sessionRoute";
 
 export const Route = createFileRoute("/")({
   component: DashboardPage,
@@ -18,9 +20,14 @@ function DashboardPage() {
 }
 
 function DashboardSession() {
-  const viewerId = useQuery(api.features.users.viewer, {});
+  const { isLoading } = useConvexAuth();
+  const viewerId = useQuery(
+    api.features.users.viewer,
+    isLoading ? "skip" : {},
+  );
+  const route = sessionRoute({ authLoading: isLoading, viewerId });
 
-  if (viewerId === undefined) {
+  if (route === "pending") {
     return (
       <PageFrame>
         <p className="text-sm text-neutral-400">Checking session…</p>
@@ -28,7 +35,7 @@ function DashboardSession() {
     );
   }
 
-  if (viewerId === null) {
+  if (route === "/home") {
     return <Navigate to="/home" replace />;
   }
 

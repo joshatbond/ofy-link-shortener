@@ -6,7 +6,7 @@
 bun install
 ```
 
-`VITE_CONVEX_URL` is inlined when Vite builds or serves the app. Set it before `bun run dev` or `bun run build`. If it is missing, or it is not an absolute `http://` or `https://` URL, the marketing page at `/home` says the backend is not configured. A valid session shows the dashboard at `/`.
+`VITE_CONVEX_URL` is inlined when Vite builds or serves the app. Set it before `bun run dev` or `bun run build`. It must be an absolute `http://` or `https://` URL. A valid `users.viewer` shows the dashboard at `/`. Otherwise the app shows the marketing page at `/home`.
 
 For local development, copy `.env.example` to `.env.local`. `bunx convex dev` writes `VITE_CONVEX_URL` into that file.
 
