@@ -4,6 +4,7 @@ import { useConvexAuth } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { SignInPanel } from "../components/auth/sign-in-panel";
+import { useAuthCodeExchangeFailed } from "../lib/authCodeExchange";
 import { convex } from "../lib/convex";
 import { sessionRoute } from "../lib/sessionRoute";
 
@@ -21,11 +22,16 @@ function HomePage() {
 
 function HomeSession() {
   const { isLoading } = useConvexAuth();
+  const handshakeFailed = useAuthCodeExchangeFailed();
   const viewerId = useQuery(
     api.features.users.viewer,
-    isLoading ? "skip" : {},
+    isLoading && !handshakeFailed ? "skip" : {},
   );
-  const route = sessionRoute({ authLoading: isLoading, viewerId });
+  const route = sessionRoute({
+    authLoading: isLoading,
+    handshakeFailed,
+    viewerId,
+  });
 
   if (route === "pending") {
     return (
