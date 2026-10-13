@@ -124,7 +124,12 @@ export function LinkForm(props: {
     try {
       await props.onSubmit(draft);
     } catch (submitError) {
-      setError(mutationErrorMessage(submitError));
+      const message = mutationErrorMessage(submitError);
+      const live = slugFieldMessage(draft.slug);
+      if (live?.tone === "error" && live.text === message) {
+        return;
+      }
+      setError(message);
     } finally {
       setPending(false);
     }
