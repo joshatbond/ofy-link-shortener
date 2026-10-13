@@ -1,6 +1,7 @@
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { convex } from "../lib/convex";
+import { notifyLocationReplaced } from "../lib/locationReplace";
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -27,6 +28,7 @@ function RootLayout() {
           "",
           `${url.pathname}${url.search}${url.hash}`,
         );
+        notifyLocationReplaced();
       }}
     >
       {shell}
