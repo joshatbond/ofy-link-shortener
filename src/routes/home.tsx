@@ -1,9 +1,12 @@
-import { Component, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Navigate, createFileRoute } from "@tanstack/react-router";
+import { useConvexAuth } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { SignInPanel } from "../components/auth/sign-in-panel";
+import { useAuthCodeExchangeFailed } from "../lib/authCodeExchange";
 import { convex } from "../lib/convex";
+import { sessionRoute } from "../lib/sessionRoute";
 
 export const Route = createFileRoute("/home")({
   component: HomePage,
@@ -18,9 +21,19 @@ function HomePage() {
 }
 
 function HomeSession() {
-  const viewerId = useQuery(api.features.users.viewer, {});
+  const { isLoading } = useConvexAuth();
+  const handshakeFailed = useAuthCodeExchangeFailed();
+  const viewerId = useQuery(
+    api.features.users.viewer,
+    isLoading && !handshakeFailed ? "skip" : {},
+  );
+  const route = sessionRoute({
+    authLoading: isLoading,
+    handshakeFailed,
+    viewerId,
+  });
 
-  if (viewerId === undefined) {
+  if (route === "pending") {
     return (
       <MarketingPage
         signIn={<p className="text-sm text-neutral-400">Checking session…</p>}
@@ -28,7 +41,7 @@ function HomeSession() {
     );
   }
 
-  if (viewerId !== null) {
+  if (route === "/") {
     return <Navigate to="/" replace />;
   }
 
@@ -59,7 +72,6 @@ function MarketingPage(props: { signIn: ReactNode }) {
               Your time is important. Skip the wait and privacy concerns of
               ad-funded shorteners.
             </p>
-            <BackendStatus />
             {props.signIn}
           </div>
         </div>
@@ -70,57 +82,4 @@ function MarketingPage(props: { signIn: ReactNode }) {
       </footer>
     </>
   );
-}
-
-function BackendStatus() {
-  if (!convex) {
-    return <StatusText>Backend is not configured.</StatusText>;
-  }
-
-  return (
-    <HealthQueryBoundary>
-      <HealthStatus />
-    </HealthQueryBoundary>
-  );
-}
-
-function HealthStatus() {
-  const health = useQuery(api.health.check, {});
-  if (health === undefined) {
-    return <StatusText>Checking the backend…</StatusText>;
-  }
-  if (health.ok) {
-    return <StatusText>Backend is ready.</StatusText>;
-  }
-  return <StatusText>Backend check failed.</StatusText>;
-}
-
-function StatusText({ children }: { children: string }) {
-  return <p className="text-sm text-neutral-500">{children}</p>;
-}
-
-type HealthQueryBoundaryProps = {
-  children: ReactNode;
-};
-
-type HealthQueryBoundaryState = {
-  failed: boolean;
-};
-
-class HealthQueryBoundary extends Component<
-  HealthQueryBoundaryProps,
-  HealthQueryBoundaryState
-> {
-  state: HealthQueryBoundaryState = { failed: false };
-
-  static getDerivedStateFromError(): HealthQueryBoundaryState {
-    return { failed: true };
-  }
-
-  render() {
-    if (this.state.failed) {
-      return <StatusText>Backend check failed.</StatusText>;
-    }
-    return this.props.children;
-  }
 }
