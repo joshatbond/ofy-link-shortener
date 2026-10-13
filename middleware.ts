@@ -4,7 +4,7 @@ import {
   convexSiteOrigin,
   forwardLocation,
   slugFromPathname,
-} from "./src/lib/publicSlug";
+} from "./src/lib/publicSlug.js";
 
 export const config = {
   runtime: "nodejs",

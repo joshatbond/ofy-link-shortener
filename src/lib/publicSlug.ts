@@ -1,7 +1,7 @@
 import {
   assertRedirectUrl,
   isReservedSlug,
-} from "../../convex/features/linkPolicy";
+} from "../../convex/features/linkPolicy.js";
 
 /**
  * The slug to look up, or null when this path stays on the SPA.
