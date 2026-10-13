@@ -1,7 +1,10 @@
 // @vitest-environment node
+import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 import { describe, expect, test } from "vitest";
 import middleware from "../../middleware";
 
@@ -49,6 +52,61 @@ describe("middleware matcher", () => {
 
     expect(vercel.proxy?.entrypoint).toBe("middleware.ts");
     expect(vercel.proxy?.matcher).toBeUndefined();
+  });
+});
+
+describe("compiled middleware on Node ESM", () => {
+  test("the root and /home load instead of throwing ERR_MODULE_NOT_FOUND", async () => {
+    const out = resolve(root, ".tmp-middleware-esm");
+    await rm(out, { recursive: true, force: true });
+
+    try {
+      for (const file of [
+        "middleware.ts",
+        "src/lib/publicSlug.ts",
+        "convex/features/linkPolicy.ts",
+      ]) {
+        const source = readFileSync(resolve(root, file), "utf8");
+        const { outputText } = ts.transpileModule(source, {
+          fileName: file,
+          compilerOptions: {
+            module: ts.ModuleKind.ESNext,
+            target: ts.ScriptTarget.ES2022,
+          },
+        });
+        const dest = resolve(out, file.replace(/\.ts$/, ".js"));
+        await mkdir(dirname(dest), { recursive: true });
+        await writeFile(dest, outputText);
+      }
+
+      await writeFile(
+        resolve(out, "run.js"),
+        `
+import middleware from "./middleware.js";
+delete process.env.CONVEX_SITE_URL;
+delete process.env.VITE_CONVEX_URL;
+
+for (const path of ["/", "/home", "/home/", "/assets/app.js", "/favicon.ico", "/logo.png"]) {
+  const response = await middleware(new Request("https://sc.ofys.org" + path));
+  if (response.status !== 200 || response.headers.get("x-middleware-next") !== "1") {
+    console.error("SPA path failed", path, response.status, response.headers.get("location"));
+    process.exit(1);
+  }
+}
+
+const slug = await middleware(new Request("https://sc.ofys.org/handbook?ref=1"));
+if (slug.status !== 307 || slug.headers.get("location") !== "/unknown") {
+  console.error("slug path failed", slug.status, slug.headers.get("location"));
+  process.exit(1);
+}
+`,
+      );
+
+      const { status, stderr } = await runNode(resolve(out, "run.js"));
+      expect(status, stderr).toBe(0);
+    } finally {
+      await rm(out, { recursive: true, force: true });
+    }
   });
 });
 
@@ -145,6 +203,24 @@ async function withLookup(
     restoreEnv("CONVEX_SITE_URL", previousSite);
     restoreEnv("VITE_CONVEX_URL", previousCloud);
   }
+}
+
+function runNode(script: string): Promise<{ status: number | null; stderr: string }> {
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn(process.execPath, [script], {
+      cwd: root,
+      env: process.env,
+    });
+    let stderr = "";
+    child.stderr.setEncoding("utf8");
+    child.stderr.on("data", (chunk: string) => {
+      stderr += chunk;
+    });
+    child.on("error", reject);
+    child.on("close", (status) => {
+      resolvePromise({ status, stderr });
+    });
+  });
 }
 
 function restoreEnv(name: string, value: string | undefined): void {
