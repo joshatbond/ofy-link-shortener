@@ -1,12 +1,8 @@
 import type { ReactNode } from "react";
 import { Navigate, createFileRoute } from "@tanstack/react-router";
-import { useConvexAuth } from "@convex-dev/auth/react";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
 import { SignInPanel } from "../components/auth/sign-in-panel";
-import { useAuthCodeExchangeFailed } from "../lib/authCodeExchange";
 import { convex } from "../lib/convex";
-import { sessionRoute } from "../lib/sessionRoute";
+import { useSessionDestination } from "../lib/useSessionDestination";
 
 export const Route = createFileRoute("/home")({
   component: HomePage,
@@ -21,17 +17,7 @@ function HomePage() {
 }
 
 function HomeSession() {
-  const { isLoading } = useConvexAuth();
-  const handshakeFailed = useAuthCodeExchangeFailed();
-  const viewerId = useQuery(
-    api.features.users.viewer,
-    isLoading && !handshakeFailed ? "skip" : {},
-  );
-  const route = sessionRoute({
-    authLoading: isLoading,
-    handshakeFailed,
-    viewerId,
-  });
+  const route = useSessionDestination();
 
   if (route === "pending") {
     return (
