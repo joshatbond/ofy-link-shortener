@@ -16,13 +16,23 @@ describe("googleAccountProfile", () => {
       name: "Ada",
       email: "ada@ofy.org",
       image: "https://example.com/ada.png",
-      emailVerified: true,
+      emailVerified: false,
     });
 
     expect(
       googleAccountProfile({
         sub: "google-user",
         email: "teacher@ofy.org",
+      }).emailVerified,
+    ).toBe(false);
+  });
+
+  test("passes a true email_verified claim through unchanged", () => {
+    expect(
+      googleAccountProfile({
+        sub: "google-user",
+        email: "teacher@ofy.org",
+        email_verified: true,
       }).emailVerified,
     ).toBe(true);
   });

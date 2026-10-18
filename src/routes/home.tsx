@@ -55,6 +55,7 @@ function HomeComposer(props: {
     intent: HeroIntent;
   } | null>(null);
   const queuedRef = useRef(queued);
+  const submitLock = useRef(false);
   queuedRef.current = queued;
 
   useEffect(() => {
@@ -123,55 +124,67 @@ function HomeComposer(props: {
   );
 
   async function run(destination: string, intent: HeroIntent) {
-    const store = browserKeyValueStore();
-    if (store === null) {
-      setError("This browser cannot keep a link draft.");
+    if (submitLock.current) {
       return;
     }
-
-    const decision = heroSubmission({
-      destination,
-      intent,
-      viewerId: props.viewer === "signed-in" ? "signed-in" : null,
-    });
-
-    if (decision.type === "invalid") {
-      setError(decision.message);
-      return;
-    }
-
-    setError(null);
-
-    if (decision.type === "sign-in") {
-      savePendingLink(store, decision.draft);
-      clearOpenedLink(store);
-      await navigate({ to: "/login" });
-      return;
-    }
-
-    if (props.createLink === null) {
-      setError("Link creation is not configured on this deployment.");
-      return;
-    }
-
+    submitLock.current = true;
     setPending(true);
+    let handedOff = false;
+
     try {
-      clearPendingLink(store);
+      const store = browserKeyValueStore();
+      if (store === null) {
+        setError("This browser cannot keep a link draft.");
+        return;
+      }
+
+      const decision = heroSubmission({
+        destination,
+        intent,
+        viewerId: props.viewer === "signed-in" ? "signed-in" : null,
+      });
+
+      if (decision.type === "invalid") {
+        setError(decision.message);
+        return;
+      }
+
+      setError(null);
+
+      if (decision.type === "sign-in") {
+        savePendingLink(store, decision.draft);
+        clearOpenedLink(store);
+        handedOff = true;
+        await navigate({ to: "/login" });
+        return;
+      }
+
+      if (props.createLink === null) {
+        setError("Link creation is not configured on this deployment.");
+        return;
+      }
+
       const created = await createGeneratedLink({
         destination: decision.destination,
         nextSlug: randomGeneratedSlug,
         create: props.createLink,
       });
+      clearPendingLink(store);
       saveOpenedLink(store, {
         linkId: created.linkId,
         slug: created.slug,
         qr: decision.qr,
       });
+      handedOff = true;
       await navigate({ to: "/" });
     } catch (createError) {
+      handedOff = false;
       setError(mutationErrorMessage(createError));
     } finally {
-      setPending(false);
+      if (!handedOff) {
+        submitLock.current = false;
+        setPending(false);
+      }
     }
   }
 }

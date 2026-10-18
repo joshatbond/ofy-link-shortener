@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { createGeneratedLink } from "../../lib/createGeneratedLink";
 import { randomGeneratedSlug } from "../../lib/generatedSlug";
-import { beginPendingLinkCreate } from "../../lib/landingHandoff";
+import {
+  beginPendingLinkCreate,
+  landingHandoffGeneration,
+} from "../../lib/landingHandoff";
 import { mutationErrorMessage } from "../../lib/dashboardLinks";
 import {
   browserKeyValueStore,
   clearOpenedLink,
   readOpenedLink,
   saveOpenedLink,
-  savePendingLink,
   type OpenedLink,
 } from "../../lib/pendingLink";
 
@@ -30,29 +32,31 @@ export function useLandingHandoff(
       return;
     }
 
+    const startedGeneration = landingHandoffGeneration();
     const existing = readOpenedLink(store);
     if (existing !== null) {
       setOpened(existing);
     }
 
     const pending = beginPendingLinkCreate(store, async (draft) => {
-      try {
-        const created = await createGeneratedLink({
-          destination: draft.destination,
-          nextSlug: randomGeneratedSlug,
-          create: (args) => createRef.current(args),
-        });
-        const next: OpenedLink = {
-          linkId: created.linkId,
-          slug: created.slug,
-          qr: draft.qr,
-        };
-        saveOpenedLink(store, next);
-        return next;
-      } catch (error) {
-        savePendingLink(store, draft);
-        throw error;
+      if (landingHandoffGeneration() !== startedGeneration) {
+        throw new Error("This draft was discarded.");
       }
+      const created = await createGeneratedLink({
+        destination: draft.destination,
+        nextSlug: randomGeneratedSlug,
+        create: (args) => createRef.current(args),
+      });
+      if (landingHandoffGeneration() !== startedGeneration) {
+        throw new Error("This draft was discarded.");
+      }
+      const next: OpenedLink = {
+        linkId: created.linkId,
+        slug: created.slug,
+        qr: draft.qr,
+      };
+      saveOpenedLink(store, next);
+      return next;
     });
 
     if (pending === null) {
@@ -62,12 +66,12 @@ export function useLandingHandoff(
     let cancelled = false;
     void pending.then(
       (next) => {
-        if (!cancelled) {
+        if (!cancelled && landingHandoffGeneration() === startedGeneration) {
           setOpened(next);
         }
       },
       (reason: unknown) => {
-        if (!cancelled) {
+        if (!cancelled && landingHandoffGeneration() === startedGeneration) {
           setError(mutationErrorMessage(reason));
         }
       },

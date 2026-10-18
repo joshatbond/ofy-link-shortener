@@ -1,6 +1,8 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { abandonLandingHandoff } from "../../lib/landingHandoff";
+import { browserKeyValueStore } from "../../lib/pendingLink";
 
 export function SignOutButton(props: { className?: string }) {
   const { signOut } = useAuthActions();
@@ -23,6 +25,10 @@ export function SignOutButton(props: { className?: string }) {
 
   async function handleClick() {
     setPending(true);
+    const store = browserKeyValueStore();
+    if (store !== null) {
+      abandonLandingHandoff(store);
+    }
 
     try {
       await signOut();
