@@ -1,5 +1,5 @@
 import { useMutation } from "convex/react";
-import { useState } from "react";
+import { useState, type Ref } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { api } from "../../../convex/_generated/api";
 import { linkActivity, mutationErrorMessage } from "../../lib/dashboardLinks";
@@ -35,6 +35,8 @@ export function OwnerLinkCard(props: {
   onEdit: () => void;
   onShares: () => void;
   onDeleted: () => void;
+  highlighted?: boolean;
+  cardRef?: Ref<HTMLElement>;
 }) {
   const disableLink = useMutation(api.features.links.disable);
   const updateLink = useMutation(api.features.links.update);
@@ -46,9 +48,11 @@ export function OwnerLinkCard(props: {
 
   return (
     <article
-      className={`flex h-full flex-col gap-3 rounded-md border bg-gradient-to-b from-neutral-900 to-neutral-950 p-4 ${
-        props.editing || props.managingShares
-          ? "border-neutral-400"
+      ref={props.cardRef}
+      tabIndex={props.highlighted ? -1 : undefined}
+      className={`flex h-full flex-col gap-3 rounded-md border bg-gradient-to-b from-neutral-900 to-neutral-950 p-4 outline-none focus-visible:ring-2 focus-visible:ring-neutral-100 ${
+        props.highlighted || props.editing || props.managingShares
+          ? "border-neutral-100"
           : "border-neutral-700"
       }`}
     >
