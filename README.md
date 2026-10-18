@@ -6,7 +6,7 @@
 bun install
 ```
 
-`VITE_CONVEX_URL` is inlined when Vite builds or serves the app. Set it before `bun run dev` or `bun run build`. It must be an absolute `http://` or `https://` URL. A valid `users.viewer` shows the dashboard at `/`. Otherwise the app shows the marketing page at `/home`.
+`VITE_CONVEX_URL` is inlined when Vite builds or serves the app. Set it before `bun run dev` or `bun run build`. It must be an absolute `http://` or `https://` URL. A valid `users.viewer` shows the dashboard at `/` on `https://sc.ofy.sh`. Otherwise `/` shows the marketing page at `/home`. Sign-in is `/login` with an `@ofy.org` Google account. Google's `email_verified` claim is not required. A signed-in visit to `/home` stays there so another link can be started. The landing hero asks only for a destination and generates a 5-character slug. Custom slugs stay in the dashboard New link dialog. Public short links are `https://ofy.sh/{slug}`.
 
 For local development, copy `.env.example` to `.env.local`. `bunx convex dev` writes `VITE_CONVEX_URL` into that file.
 
@@ -30,7 +30,7 @@ Set these on the Convex deployment. Set `VITE_CONVEX_URL` on Vercel as well.
 | --- | --- | --- |
 | `AUTH_GOOGLE_ID` | Yes, for Google sign-in | Google OAuth client id. The Google button stays hidden until this and the secret are set. |
 | `AUTH_GOOGLE_SECRET` | Yes, for Google sign-in | Google OAuth client secret. |
-| `SITE_URL` | Yes | Canonical app origin. Production is `https://sc.ofys.org`. Missing `SITE_URL` rejects post-login redirects. |
+| `SITE_URL` | Yes | Canonical app origin. Production is `https://sc.ofy.sh`. Missing `SITE_URL` rejects post-login redirects. |
 | `ALLOWED_SITE_URLS` | No | Comma-separated extra origins that may receive the post-login redirect. |
 | `VITE_CONVEX_URL` | Yes, for the SPA and slug redirects | Absolute Convex cloud URL. Inlined at build time, and read at runtime by the slug middleware. |
 | `DEV_PASSWORD_AUTH` | No | Set to `true` to enable the dev password provider. Leave unset in production. |

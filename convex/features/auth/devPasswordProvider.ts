@@ -2,16 +2,17 @@ import Google from "@auth/core/providers/google";
 import { Password } from "@convex-dev/auth/providers/Password";
 import { assertOfyOrgEmail } from "./ofyEmail";
 import { isLocalDevDeployment } from "./devOnly";
+import { googleAccountProfile } from "./googleProfile";
 
 const google = Google({
   profile(profile) {
-    return {
-      id: profile.sub,
+    return googleAccountProfile({
+      sub: profile.sub,
       name: profile.name,
-      email: assertOfyOrgEmail(profile.email),
-      image: profile.picture,
-      emailVerified: profile.email_verified,
-    };
+      email: profile.email,
+      picture: profile.picture,
+      email_verified: profile.email_verified,
+    });
   },
 });
 

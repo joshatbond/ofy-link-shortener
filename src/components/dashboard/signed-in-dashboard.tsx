@@ -1,4 +1,4 @@
-import { Component, useState, type ReactNode } from "react";
+import { Component, useEffect, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery } from "convex/react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { api } from "../../../convex/_generated/api";
@@ -18,9 +18,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { CreatedLinkDialog } from "./created-link-dialog";
 import { OwnerLinkCard, SharedLinkCard, type DashboardLink } from "./link-card";
 import { LinkForm } from "./link-form";
 import { ShareManager } from "./share-manager";
+import { useLandingHandoff } from "./use-landing-handoff";
 
 const primaryButtonClass =
   "rounded bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-950 disabled:opacity-60";
@@ -55,6 +57,10 @@ function DashboardContent() {
   const [query, setQuery] = useState("");
   const [panel, setPanel] = useState<Panel | null>(null);
   const [createPending, setCreatePending] = useState(false);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const detailsRef = useRef<HTMLElement | null>(null);
+  const focusDetails = useRef(false);
+  const created = useLandingHandoff((args) => createLink(args));
   const now = Date.now();
 
   const myLinks = mine === undefined ? undefined : filterListedLinks(mine, query);
@@ -67,6 +73,19 @@ function DashboardContent() {
   const name = profile?.name?.trim() || undefined;
   const email = profile?.email?.trim() || undefined;
   const label = name ?? email ?? "Signed in.";
+
+  useEffect(() => {
+    if (!focusDetails.current || highlightId === null) {
+      return;
+    }
+    const node = detailsRef.current;
+    if (node === null) {
+      return;
+    }
+    focusDetails.current = false;
+    node.scrollIntoView({ block: "center" });
+    node.focus();
+  }, [highlightId, myLinks]);
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
@@ -90,6 +109,31 @@ function DashboardContent() {
           placeholder="Slug, destination, or description"
         />
       </label>
+
+      {created.error !== null ? (
+        <p role="alert" className="text-sm text-red-300">
+          {created.error}
+        </p>
+      ) : null}
+
+      <CreatedLinkDialog
+        opened={created.opened}
+        onDismiss={created.dismiss}
+        onViewDetails={() => {
+          if (created.opened === null) {
+            return;
+          }
+          focusDetails.current = true;
+          setQuery(created.opened.slug);
+          setHighlightId(created.opened.linkId);
+          created.dismiss();
+        }}
+        onCloseAutoFocus={(event) => {
+          if (focusDetails.current) {
+            event.preventDefault();
+          }
+        }}
+      />
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -192,6 +236,14 @@ function DashboardContent() {
             <OwnerLinkCard
               link={link}
               now={now}
+              highlighted={highlightId === link._id}
+              cardRef={
+                highlightId === link._id
+                  ? (node) => {
+                      detailsRef.current = node;
+                    }
+                  : undefined
+              }
               editing={panel?.kind === "edit" && panel.linkId === link._id}
               managingShares={
                 panel?.kind === "shares" && panel.linkId === link._id
